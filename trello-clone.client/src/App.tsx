@@ -10,7 +10,7 @@ import { Box, Container } from '@mui/material';
 
 function Header() {
   return (
-    <NavTabs leftContent={<span>Trello Clone</span>} />
+    <NavTabs leftContent={<span>Portfolio</span>} />
   );
 }
 
