@@ -1,5 +1,3 @@
-# Trello-Clone
-
 ## Try Online
 
 You can try the live demo of the Kanban board here:
@@ -10,7 +8,7 @@ You can try the live demo of the Kanban board here:
 
 ## Overview
 
-This project is a Trello-like Kanban board application built with **React** (frontend), **.NET** (backend), and deployed/managed using **Azure**.
+This project is a Trello-like Kanban board application built with **React** (frontend), **.NET** (backend), and deployed/managed using **Azure** and **GitHub**.
 It is currently under development and serves as a portfolio project to showcase my skills in React, .NET, and Azure, as well as to gain hands-on experience with these technologies.
 
 ## Features
@@ -26,7 +24,7 @@ It is currently under development and serves as a portfolio project to showcase 
 
 - **Frontend:** React, TypeScript, Vite
 - **Backend:** .NET (ASP.NET Core)
-- **Cloud/DevOps:** Azure
+- **Cloud/DevOps:** Azure, GitHub
 
 ## Getting Started
 
@@ -34,41 +32,6 @@ It is currently under development and serves as a portfolio project to showcase 
 
 - No prerequisites are needed to try the online demo (see link above).
 - To run locally: Node.js (for frontend) and .NET SDK (for backend) are required.
-- Azure account (for deployment, optional)
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone <repo-url>
-   cd Trello-Clone
-   ```
-
-2. Install frontend dependencies:
-   ```bash
-   cd trello-clone.client
-   npm install
-   ```
-
-3. Run the frontend:
-   ```bash
-   npm run dev
-   ```
-
-4. Run the backend:
-   ```bash
-   cd ../Trello-Clone.Server
-   dotnet run
-   ```
-
-## Project Structure
-
-- `trello-clone.client/` — React frontend
-- `Trello-Clone.Server/` — .NET backend
-
-## Contributing
-
-Contributions are welcome! Please open an issue or submit a pull request.
 
 ## License
 
