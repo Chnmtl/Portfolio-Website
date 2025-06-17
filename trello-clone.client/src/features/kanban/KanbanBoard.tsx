@@ -5,23 +5,9 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { styled } from '@mui/material/styles';
 import AddIcon from '@mui/icons-material/Add';
 import Fab from '@mui/material/Fab';
-
-interface Tag {
-    name: string;
-    color: string; // e.g., 'red', 'blue', 'green'
-}
-interface Task {
-    id: string;
-    name: string;
-    description: string;
-    tags?: Tag[];
-}
-
-interface Column {
-    id: string;
-    title: string;
-    tasks: Task[];
-}
+import { Column, Task, NewTaskState, EditTaskState, DeleteConfirmState, TagInputState } from './types';
+import { DEFAULT_COLUMNS, TAG_COLORS, STORAGE_KEY } from './constants';
+import { isTaskWithTags, hasDuplicateTagNames } from './utils';
 
 const BoardContainer = styled(Box)(({ theme }) => ({
     display: 'flex',
@@ -168,62 +154,14 @@ const TagSwatch = styled('span')<{ bgcolor: string }>(({ bgcolor, theme }) => ({
     verticalAlign: 'middle',
 }));
 
-const DEFAULT_COLUMNS: Column[] = [
-    {
-        id: 'column-1',
-        title: 'To Do',
-        tasks: [
-            { id: 'task-1', name: 'Fix login bug', description: 'Users cannot log in with Google on mobile devices.', tags: [{ name: 'BUG', color: 'red' }] },
-            { id: 'task-2', name: 'Write docs', description: 'Document the new API endpoints for the frontend team.', tags: [{ name: 'DOC', color: 'blue' }] },
-            { id: 'task-3', name: 'Design dashboard', description: 'Create a new dashboard layout for analytics.', tags: [{ name: 'UI', color: 'green' }] },
-            { id: 'task-4', name: 'Add dark mode', description: 'Implement dark mode toggle in settings.', tags: [{ name: 'UI', color: 'green' }] },
-        ],
-    },
-    {
-        id: 'column-2',
-        title: 'In Progress',
-        tasks: [
-            { id: 'task-5', name: 'Refactor auth', description: 'Refactor authentication logic for better maintainability.', tags: [{ name: 'CODE', color: 'brown' }] },
-            { id: 'task-6', name: 'Write tests', description: 'Add unit tests for the user service.', tags: [{ name: 'CODE', color: 'brown' }] },
-        ],
-    },
-    {
-        id: 'column-3',
-        title: 'Completed',
-        tasks: [
-            { id: 'task-7', name: 'Setup CI', description: 'Continuous integration pipeline for PRs.', tags: [{ name: 'OPS', color: 'orange' }] },
-            { id: 'task-8', name: 'Initial setup', description: 'Project structure and dependencies.', tags: [{ name: 'INIT', color: 'purple' }] },
-        ],
-    },
-];
-
-// Helper for migration type guard
-function isTaskWithTags(task: unknown): task is Task {
-    return typeof task === 'object' && task !== null && 'name' in task && 'description' in task;
-}
-
-// Color palette for tags
-const TAG_COLORS = [
-    '#1976d2', // blue
-    '#388e3c', // green
-    '#d32f2f', // red
-    '#fbc02d', // yellow
-    '#7b1fa2', // purple
-    '#f57c00', // orange
-    '#455a64', // gray
-    '#c2185b', // pink
-    '#0097a7', // teal
-    '#5d4037', // brown
-];
-
 const KanbanBoard = () => {
     // For tag input in add/edit modals
-    const [tagInput, setTagInput] = useState<{ name: string; color: string }[]>([]);
-    const [editTagInput, setEditTagInput] = useState<{ name: string; color: string }[]>([]);
+    const [tagInput, setTagInput] = useState<TagInputState[]>([]);
+    const [editTagInput, setEditTagInput] = useState<TagInputState[]>([]);
 
     // On first load, migrate old tasks if needed
     const getInitialColumns = () => {
-        const saved = localStorage.getItem('kanban-columns');
+        const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
@@ -260,17 +198,17 @@ const KanbanBoard = () => {
         return DEFAULT_COLUMNS;
     };
     const [columns, setColumns] = useState<Column[]>(getInitialColumns);
-    const [newTasks, setNewTasks] = useState<{ [columnId: string]: { name: string; description: string } }>({});
+    const [newTasks, setNewTasks] = useState<NewTaskState>({});
     const [modalColumnId, setModalColumnId] = useState<string | null>(null);
-    const [editingTask, setEditingTask] = useState<{ columnId: string; task: Task } | null>(null);
+    const [editingTask, setEditingTask] = useState<EditTaskState | null>(null);
     const [editValues, setEditValues] = useState<{ name: string; description: string }>({ name: '', description: '' });
-    const [deleteConfirm, setDeleteConfirm] = useState<{ columnId: string; taskId: string } | null>(null);
+    const [deleteConfirm, setDeleteConfirm] = useState<DeleteConfirmState | null>(null);
     // Track if user has cleared the board
     const [cleared, setCleared] = useState(false);
 
     // Save to localStorage on columns change
     useEffect(() => {
-        localStorage.setItem('kanban-columns', JSON.stringify(columns));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(columns));
     }, [columns]);
 
     // Restore default tasks if all columns are empty
@@ -354,18 +292,6 @@ const KanbanBoard = () => {
             setEditTagInput(editingTask.task.tags ? [...editingTask.task.tags] : []);
         }
     }, [editingTask]);
-
-    // Helper for duplicate tag name detection (case-insensitive, ignores empty)
-    function hasDuplicateTagNames(tags: { name: string }[]) {
-        const seen = new Set<string>();
-        for (const t of tags) {
-            if (!t.name.trim()) continue;
-            const lower = t.name.trim().toLowerCase();
-            if (seen.has(lower)) return true;
-            seen.add(lower);
-        }
-        return false;
-    }
 
     return (
         <>
