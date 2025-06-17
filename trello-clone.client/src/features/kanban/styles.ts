@@ -137,6 +137,59 @@ export const TagLegendContainer = styled(Box)(({ theme }) => ({
     flexWrap: 'wrap',
 }));
 
+// TagInput component styled components
+export const TagInputContainer = styled(Box)(({ theme }) => ({
+    marginBottom: theme.spacing(4),
+}));
+
+export const TagRowContainer = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: theme.spacing(2),
+    border: '1px solid',
+    borderColor: theme.palette.divider,
+    borderRadius: theme.spacing(2),
+    padding: theme.spacing(2),
+    gap: theme.spacing(2),
+    background: theme.palette.background.default,
+}));
+
+export const TagFieldsContainer = styled(Box)({
+    display: 'flex',
+    flex: 1,
+    alignItems: 'center',
+    gap: 16, // theme.spacing(2)
+});
+
+export const TagInputWrapper = styled(Box)({
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    minHeight: 56,
+});
+
+export const ColorPalette = styled(Box)({
+    display: 'grid',
+    gridTemplateColumns: 'repeat(5, 1fr)',
+    gridTemplateRows: 'repeat(2, 1fr)',
+    gap: 8, // theme.spacing(1)
+    alignItems: 'center',
+    marginRight: 16, // theme.spacing(2)
+});
+
+export const ColorSwatch = styled(Box)<{ bgcolor: string; selected: boolean }>(({ bgcolor, selected }) => ({
+    width: 24,
+    height: 24,
+    borderRadius: '50%',
+    background: bgcolor,
+    border: selected ? '2px solid #1976d2' : '2px solid #fff',
+    boxShadow: selected ? '0 0 0 2px #1976d2' : undefined,
+    cursor: 'pointer',
+    outline: 'none',
+    transition: 'border 0.2s',
+}));
+
 export const TagSwatch = styled('span')<{ bgcolor: string }>(({ bgcolor, theme }) => ({
     display: 'inline-block',
     width: 28,

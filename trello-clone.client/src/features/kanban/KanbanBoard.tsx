@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { Box, Typography, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton } from '@mui/material';
+import { Box, Typography, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import Fab from '@mui/material/Fab';
 import { Column, Task, NewTaskState, EditTaskState, DeleteConfirmState, TagInputState } from './types';
-import { DEFAULT_COLUMNS, TAG_COLORS, STORAGE_KEY } from './constants';
+import { DEFAULT_COLUMNS, STORAGE_KEY } from './constants';
 import { isTaskWithTags, hasDuplicateTagNames } from './utils';
+import { TagInput } from './components/TagInput';
 import {
     BoardContainer,
     ColumnPaper,
@@ -106,6 +107,12 @@ const KanbanBoard = () => {
         const name = newTasks[columnId]?.name?.trim();
         const description = newTasks[columnId]?.description?.trim();
         if (!name) return;
+        
+        // Prevent submission if tags are invalid
+        if (hasDuplicateTagNames(tagInput) || tagInput.some(t => !t.name.trim())) {
+            return;
+        }
+        
         setColumns(cols =>
             cols.map(col =>
                 col.id === columnId
@@ -136,6 +143,12 @@ const KanbanBoard = () => {
     // Edit task handler
     const handleEditTask = () => {
         if (!editingTask) return;
+        
+        // Prevent submission if tags are invalid
+        if (hasDuplicateTagNames(editTagInput) || editTagInput.some(t => !t.name.trim())) {
+            return;
+        }
+        
         setColumns(cols =>
             cols.map(col =>
                 col.id === editingTask.columnId
@@ -279,56 +292,10 @@ const KanbanBoard = () => {
                         onChange={e => setNewTasks(tasks => ({ ...tasks, [modalColumnId!]: { ...tasks[modalColumnId!], description: e.target.value } }))}
                         sx={{ mb: 2 }}
                     />
-                    {/* Tags input for add */}
-                    <Box mb={4 /* increased bottom margin */}>
-                        <Typography variant="subtitle2" sx={{ mb: 1 }}>Tags</Typography>
-                        {tagInput.map((tag, idx) => {
-                            const duplicate = tag.name && tagInput.filter((t, i) => t.name.trim().toLowerCase() === tag.name.trim().toLowerCase() && i !== idx).length > 0;
-                            return (
-                                <Box key={idx} display="flex" alignItems="center" mb={1} gap={1}>
-                                    <TextField
-                                        label="Tag Name"
-                                        value={tag.name}
-                                        onChange={e => setTagInput(tags => tags.map((t, i) => i === idx ? { ...t, name: e.target.value } : t))}
-                                        size="small"
-                                        sx={{ width: 100 }}
-                                        error={!!duplicate}
-                                        helperText={duplicate ? 'Duplicate tag name' : ' '}
-                                    />
-                                    {/* Color palette swatches */}
-                                    <Box display="flex" gap={0.5}>
-                                        {TAG_COLORS.map(color => (
-                                            <Box
-                                                key={color}
-                                                onClick={() => setTagInput(tags => tags.map((t, i) => i === idx ? { ...t, color } : t))}
-                                                sx={{
-                                                    width: 24, height: 24, borderRadius: '50%', background: color,
-                                                    border: tag.color === color ? '2px solid #000' : '2px solid #fff',
-                                                    boxShadow: tag.color === color ? '0 0 0 2px #1976d2' : undefined,
-                                                    cursor: 'pointer',
-                                                    outline: 'none',
-                                                }}
-                                            />
-                                        ))}
-                                    </Box>
-                                    <DeleteButton onClick={() => setTagInput(tags => tags.filter((_, i) => i !== idx))}>
-                                        <DeleteIcon fontSize="small" />
-                                    </DeleteButton>
-                                </Box>
-                            );
-                        })}
-                        {tagInput.length === 0 && (
-                            <Button
-                                size="small"
-                                variant="outlined"
-                                onClick={() => setTagInput(tags => [...tags, { name: '', color: TAG_COLORS[0] }])}
-                                disabled={hasDuplicateTagNames(tagInput) || tagInput.some(t => !t.name.trim())}
-                            >Add Tag</Button>
-                        )}
-                        {hasDuplicateTagNames(tagInput) && (
-                            <Typography color="error" variant="caption">Duplicate tag names are not allowed.</Typography>
-                        )}
-                    </Box>
+                    <TagInput
+                        tags={tagInput}
+                        onTagsChange={setTagInput}
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => {
@@ -344,7 +311,6 @@ const KanbanBoard = () => {
                                 setModalColumnId(null);
                             }
                         }}
-                        disabled={hasDuplicateTagNames(tagInput) || tagInput.some(t => !t.name.trim())}
                     >Add</Button>
                 </DialogActions>
             </Dialog>
@@ -373,82 +339,16 @@ const KanbanBoard = () => {
                         onChange={e => setEditValues(v => ({ ...v, description: e.target.value }))}
                         sx={{ mb: 2 }}
                     />
-                    {/* Tags input for edit */}
-                    <Box mb={8 /* increased bottom margin */}>
-                        <Typography variant="subtitle2" sx={{ mb: 2 }}>Tags</Typography>
-                        {editTagInput.map((tag, idx) => {
-                            const duplicate = tag.name && editTagInput.filter((t, i) => t.name.trim().toLowerCase() === tag.name.trim().toLowerCase() && i !== idx).length > 0;
-                            return (
-                                // Main container for tag row
-                                <Box key={idx} display="flex" alignItems="center" mb={2} sx={{
-                                    border: '1px solid',
-                                    borderColor: 'divider',
-                                    borderRadius: 2,
-                                    p: 2,
-                                    gap: 2,
-                                    background: theme => theme.palette.background.default,
-                                }}>
-                                    {/* Sub-container for tag name and color palette */}
-                                    <Box display="flex" flex={1} alignItems="center" gap={2}>
-                                        {/* Tag name input */}
-                                        <Box display="flex" alignItems="center" justifyContent="center" height="100%" sx={{ minHeight: 56 }}>
-                                            <TextField
-                                                label="Tag Name"
-                                                value={tag.name}
-                                                onChange={e => setEditTagInput(tags => tags.map((t, i) => i === idx ? { ...t, name: e.target.value } : t))}
-                                                size="small"
-                                                sx={{ width: 120, my: 0 }}
-                                                error={!!duplicate}
-                                                helperText={duplicate ? 'Duplicate tag name' : ' '}
-                                            />
-                                        </Box>
-                                        {/* Color palette swatches in 2x5 grid */}
-                                        <Box display="grid" gridTemplateColumns="repeat(5, 1fr)" gridTemplateRows="repeat(2, 1fr)" gap={1} alignItems="center" mr={2}>
-                                            {TAG_COLORS.map((color) => (
-                                                <Box
-                                                    key={color}
-                                                    onClick={() => setEditTagInput(tags => tags.map((t, i) => i === idx ? { ...t, color } : t))}
-                                                    sx={{
-                                                        width: 24, height: 24, borderRadius: '50%', background: color,
-                                                        border: tag.color === color ? '2px solid #1976d2' : '2px solid #fff',
-                                                        boxShadow: tag.color === color ? '0 0 0 2px #1976d2' : undefined,
-                                                        cursor: 'pointer',
-                                                        outline: 'none',
-                                                        transition: 'border 0.2s',
-                                                    }}
-                                                />
-                                            ))}
-                                        </Box>
-                                    </Box>
-                                    {/* Remove tag button */}
-                                    <DeleteButton
-                                        onClick={() => setEditTagInput(tags => tags.filter((_, i) => i !== idx))}
-                                        sx={{ ml: 1 }}
-                                    >
-                                        <DeleteIcon fontSize="small" />
-                                    </DeleteButton>
-                                </Box>
-                            );
-                        })}
-                        {editTagInput.length === 0 && (
-                            <Button
-                                size="small"
-                                variant="outlined"
-                                onClick={() => setEditTagInput(tags => [...tags, { name: '', color: TAG_COLORS[0] }])}
-                                disabled={hasDuplicateTagNames(editTagInput) || editTagInput.some(t => !t.name.trim())}
-                            >Add Tag</Button>
-                        )}
-                        {hasDuplicateTagNames(editTagInput) && (
-                            <Typography color="error" variant="caption">Duplicate tag names are not allowed.</Typography>
-                        )}
-                    </Box>
+                    <TagInput
+                        tags={editTagInput}
+                        onTagsChange={setEditTagInput}
+                    />
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={() => setEditingTask(null)}>Cancel</Button>
                     <Button
                         variant="contained"
                         onClick={handleEditTask}
-                        disabled={hasDuplicateTagNames(editTagInput) || editTagInput.some(t => !t.name.trim())}
                     >Save</Button>
                 </DialogActions>
             </Dialog>
