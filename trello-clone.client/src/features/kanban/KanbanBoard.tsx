@@ -1,158 +1,25 @@
 import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
-import { Box, Paper, Typography, Card, CardContent, IconButton, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button } from '@mui/material';
+import { Box, Typography, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Button, IconButton } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
-import { styled } from '@mui/material/styles';
 import AddIcon from '@mui/icons-material/Add';
 import Fab from '@mui/material/Fab';
 import { Column, Task, NewTaskState, EditTaskState, DeleteConfirmState, TagInputState } from './types';
 import { DEFAULT_COLUMNS, TAG_COLORS, STORAGE_KEY } from './constants';
 import { isTaskWithTags, hasDuplicateTagNames } from './utils';
-
-const BoardContainer = styled(Box)(({ theme }) => ({
-    display: 'flex',
-    gap: theme.spacing(3),
-    padding: theme.spacing(3),
-    minHeight: '80vh',
-    height: '80vh',
-    justifyContent: 'center',
-    alignItems: 'stretch',
-    backgroundColor: 'transparent',
-}));
-
-const ColumnPaper = styled(Paper)(({ theme }) => ({
-    flex: 1,
-    minWidth: 320,
-    maxWidth: 400,
-    display: 'flex',
-    flexDirection: 'column',
-    padding: theme.spacing(2),
-    borderRadius: theme.spacing(2),
-    backgroundColor: theme.palette.background.paper,
-    height: 'fit-content',
-    maxHeight: '100%',
-}));
-
-const ColumnHeader = styled(Box)(({ theme }) => ({
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: theme.spacing(2),
-}));
-
-const TasksBox = styled(Box)(({ theme }) => ({
-    minHeight: 200,
-    maxHeight: 'calc(80vh - 120px)',
-    overflowY: 'auto',
-    flex: 1,
-    // Custom scrollbar styles
-    scrollbarWidth: 'thin', // Firefox
-    scrollbarColor: `${theme.palette.primary.main} ${theme.palette.background.paper}`,
-    '&::-webkit-scrollbar': {
-        width: 8,
-        background: theme.palette.background.paper,
-        borderRadius: 4,
-    },
-    '&::-webkit-scrollbar-thumb': {
-        background: theme.palette.primary.main,
-        borderRadius: 4,
-        minHeight: 24,
-    },
-    '&::-webkit-scrollbar-thumb:hover': {
-        background: theme.palette.primary.dark,
-    },
-    '&::-webkit-scrollbar-corner': {
-        background: 'transparent',
-    },
-}));
-
-const TaskCard = styled(Card)(({ theme }) => ({
-    marginBottom: theme.spacing(1),
-    cursor: 'grab',
-    display: 'flex',
-    alignItems: 'flex-start', // align items to top
-    backgroundColor: theme.palette.background.default,
-    position: 'relative', // allow absolute positioning inside
-    paddingTop: theme.spacing(1),
-    paddingRight: theme.spacing(1),
-}));
-
-const TaskCardContent = styled(CardContent)({
-    flexGrow: 1,
-    paddingBottom: 8,
-});
-
-const DeleteButton = styled(IconButton)(({ theme }) => ({
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    zIndex: 2,
-    padding: 2,
-    minWidth: 28,
-    minHeight: 28,
-    width: 28,
-    height: 28,
-    fontSize: '1rem',
-    color: theme.palette.primary.contrastText,
-    background: theme.palette.primary.main,
-    borderRadius: '50%',
-    boxShadow: theme.shadows[1],
-    transition: 'background 0.2s, color 0.2s',
-
-    '&:hover': {
-        background: theme.palette.error.main,
-        color: theme.palette.error.contrastText,
-    },
-}));
-
-const DeleteAllButton = styled(Button)(({ theme }) => ({
-    marginLeft: theme.spacing(2),
-    background: theme.palette.error.main,
-    color: theme.palette.error.contrastText,
-    '&:hover': {
-        background: theme.palette.error.dark,
-    },
-    fontWeight: 700,
-    borderRadius: 20,
-    boxShadow: theme.shadows[2],
-    textTransform: 'none',
-    padding: '6px 20px',
-}));
-
-const TagRibbon = styled('div')<{ bgcolor: string }>(({ bgcolor }) => ({
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    background: bgcolor,
-    height: 36,
-    width: 120,
-    borderRadius: 6,
-    // border removed
-    boxShadow: '0 4px 16px 0 rgba(0,0,0,0.25)',
-    transform: 'rotate(-45deg) translate(-32px, -16px)',
-    transformOrigin: 'top left',
-    zIndex: 20,
-    pointerEvents: 'none',
-}));
-
-const TagLegendContainer = styled(Box)(({ theme }) => ({
-    display: 'flex',
-    gap: theme.spacing(2),
-    alignItems: 'center',
-    margin: `${theme.spacing(2)} 0`,
-    flexWrap: 'wrap',
-}));
-
-const TagSwatch = styled('span')<{ bgcolor: string }>(({ bgcolor, theme }) => ({
-    display: 'inline-block',
-    width: 28,
-    height: 28,
-    borderRadius: '50%',
-    background: bgcolor,
-    marginRight: theme.spacing(1),
-    border: `2px solid ${theme.palette.background.paper}`,
-    verticalAlign: 'middle',
-}));
+import {
+    BoardContainer,
+    ColumnPaper,
+    ColumnHeader,
+    TasksBox,
+    TaskCard,
+    TaskCardContent,
+    DeleteButton,
+    DeleteAllButton,
+    TagRibbon,
+    TagLegendContainer,
+    TagSwatch,
+} from './styles';
 
 const KanbanBoard = () => {
     // For tag input in add/edit modals
