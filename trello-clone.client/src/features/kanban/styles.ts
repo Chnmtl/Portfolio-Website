@@ -74,11 +74,13 @@ export const TaskCardContent = styled(CardContent)({
     paddingBottom: 8,
 });
 
-export const DeleteButton = styled(IconButton)(({ theme }) => ({
-    position: 'absolute',
-    top: 8,
-    right: 8,
-    zIndex: 2,
+export const DeleteButton = styled(IconButton)<{ positioned?: boolean }>(({ theme, positioned = false }) => ({
+    ...(positioned && {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        zIndex: 2,
+    }),
     padding: 2,
     minWidth: 28,
     minHeight: 28,

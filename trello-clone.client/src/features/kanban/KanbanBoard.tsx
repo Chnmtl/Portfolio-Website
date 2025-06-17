@@ -236,7 +236,7 @@ const KanbanBoard = () => {
                                                                 {task.description}
                                                             </Typography>
                                                         </TaskCardContent>
-                                                        <DeleteButton onClick={e => {
+                                                        <DeleteButton positioned onClick={e => {
                                                             e.stopPropagation();
                                                             setDeleteConfirm({ columnId: column.id, taskId: task.id });
                                                         }}>
@@ -254,9 +254,9 @@ const KanbanBoard = () => {
                     ))}
                 </BoardContainer>
             </DragDropContext>
-            {/* Add Card Modal */}
+            {/* Add Task Modal */}
             <Dialog open={!!modalColumnId} onClose={() => setModalColumnId(null)}>
-                <DialogTitle>Add Card</DialogTitle>
+                <DialogTitle>Add Task</DialogTitle>
                 <DialogContent>
                     <TextField
                         autoFocus
@@ -311,7 +311,9 @@ const KanbanBoard = () => {
                                             />
                                         ))}
                                     </Box>
-                                    <Button size="small" color="error" onClick={() => setTagInput(tags => tags.filter((_, i) => i !== idx))}>Remove</Button>
+                                    <DeleteButton onClick={() => setTagInput(tags => tags.filter((_, i) => i !== idx))}>
+                                        <DeleteIcon fontSize="small" />
+                                    </DeleteButton>
                                 </Box>
                             );
                         })}
@@ -418,28 +420,13 @@ const KanbanBoard = () => {
                                             ))}
                                         </Box>
                                     </Box>
-                                    {/* Remove icon button, consistent with card delete */}
-                                    <IconButton
-                                        color="error"
+                                    {/* Remove tag button */}
+                                    <DeleteButton
                                         onClick={() => setEditTagInput(tags => tags.filter((_, i) => i !== idx))}
-                                        sx={{
-                                            minWidth: 32,
-                                            minHeight: 32,
-                                            width: 32,
-                                            height: 32,
-                                            borderRadius: '50%',
-                                            background: theme => theme.palette.error.main,
-                                            color: theme => theme.palette.error.contrastText,
-                                            boxShadow: theme => theme.shadows[1],
-                                            ml: 1,
-                                            '&:hover': {
-                                                background: theme => theme.palette.error.dark,
-                                                color: theme => theme.palette.error.contrastText,
-                                            },
-                                        }}
+                                        sx={{ ml: 1 }}
                                     >
                                         <DeleteIcon fontSize="small" />
-                                    </IconButton>
+                                    </DeleteButton>
                                 </Box>
                             );
                         })}
