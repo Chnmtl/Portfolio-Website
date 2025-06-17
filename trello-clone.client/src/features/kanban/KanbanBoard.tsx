@@ -4,7 +4,7 @@ import { Box, Typography, TextField, Dialog, DialogTitle, DialogContent, DialogA
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import Fab from '@mui/material/Fab';
-import { Column, Task, NewTaskState, EditTaskState, DeleteConfirmState, TagInputState } from './types';
+import { Column, Tag, NewTaskState, EditTaskState, DeleteConfirmState, TagInputState } from './types';
 import { DEFAULT_COLUMNS, STORAGE_KEY } from './constants';
 import { isTaskWithTags, hasDuplicateTagNames } from './utils';
 import { TagInput } from './components/TagInput';
